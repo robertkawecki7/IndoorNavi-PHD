@@ -1,0 +1,850 @@
+function [TRACK, TFromS1,TFromS2,TFromS3,TFromS4,diff_for_source]  = movement_scenario(scenario, Source1, Source2, Source3, Source4, Y_LVL, noise)    
+
+
+%1 - po prostej, 2 - po przekatnej, 3 - po kwadracie., 
+%4 - dla rzeczywistych
+
+TFromS1=[];
+TFromS2=[];
+TFromS3=[];
+TFromS4=[];
+
+[YMAX, XMAX] = size(Source1);
+LENGTH = XMAX;
+if(scenario == 0)
+        for s=1:LENGTH
+    %     TRACK11(1,s) = s;
+    %     TRACK11(2,s) = Y_LVL;
+
+         TRACK(1,s) = s;
+         TRACK(2,s) = int16(YMAX * s / XMAX);
+
+         TRACK(3,s) = Source1(Y_LVL,s) + noise * randn(1,1);
+         TRACK(4,s) = Source2(Y_LVL,s) + noise * randn(1,1);
+         TRACK(5,s) = Source3(Y_LVL,s) + noise * randn(1,1);
+         TRACK(6,s) = Source4(Y_LVL,s) + noise * randn(1,1);
+
+         TRACK(7,s) = 6;
+        end
+    TRACK(2,~TRACK(2,:))=1;
+
+elseif(scenario == 1)
+    for s=1:LENGTH
+    %     TRACK11(1,s) = s;
+    %     TRACK11(2,s) = Y_LVL;
+
+         TRACK(1,s) = s;
+         TRACK(2,s) = Y_LVL;
+
+         TRACK(3,s) = Source1(Y_LVL,s) + noise * randn(1,1);
+         TRACK(4,s) = Source2(Y_LVL,s) + noise * randn(1,1);
+         TRACK(5,s) = Source3(Y_LVL,s) + noise * randn(1,1);
+         TRACK(6,s) = Source4(Y_LVL,s) + noise * randn(1,1);
+
+         TRACK(7,s) = 6;
+    end
+
+elseif(scenario == 2)
+    for s=1:LENGTH
+    %     TRACK11(1,s) = s;
+    %     TRACK11(2,s) = Y_LVL;
+        TRACK(1,s) = s;
+        TRACK(2,s) = s;
+
+        TRACK(3,s) = Source1(s,s) + noise * randn(1,1);
+        TRACK(4,s) = Source2(s,s) + noise * randn(1,1);
+        TRACK(5,s) = Source3(s,s) + noise * randn(1,1);
+        TRACK(6,s) = Source4(s,s) + noise * randn(1,1);
+        
+        TRACK(7,s) = 5;
+    end
+elseif(scenario == 3)
+    sx = 1;
+    sy = 1;
+    for s=1:LENGTH * 4
+    if( s <= 80)
+        TRACK(1,s) = s;
+        TRACK(2,s) = Y_LVL;
+        sx = s;
+        sy = Y_LVL;
+        TRACK(7,s) = 6;
+    elseif(s > 80 && s < 140)
+        TRACK(1,s) = 80;
+        TRACK(2,s) = TRACK(2,s-1) + 1;
+        sx = 80;
+        sy = TRACK(2,s-1) + 1;
+        TRACK(7,s) = 7;
+    elseif (s >= 140 && s <= 210)
+        TRACK(1,s) = 220 - s;
+        TRACK(2,s) = Y_LVL + 60;
+        sx = 220 - s;
+        sy = TRACK(2,139);
+        TRACK(7,s) = 6;
+    else
+        sx = 10;
+        if(TRACK(2,s-1) - 1 > 1)
+            TRACK(2,s) = TRACK(2,s-1) - 1;
+            sy = TRACK(2,s-1) -1;
+            TRACK(1,s) = 10;
+            TRACK(7,s) = 7;
+        else
+            s = s-1;
+            break;
+        end
+    end
+
+        TRACK(3,s) = Source1(sy,sx) + noise * randn(1,1);
+        TRACK(4,s) = Source2(sy,sx) + noise * randn(1,1);
+        TRACK(5,s) = Source3(sy,sx) + noise * randn(1,1);
+        TRACK(6,s) = Source4(sy,sx) + noise * randn(1,1);
+    end
+elseif(scenario == 4)
+    for s=1:LENGTH
+     TRACK(1,s) = s;
+     TRACK(2,s) = Y_LVL;
+
+     TRACK(3,s) = Source1(Y_LVL,s) + noise * randn(1,1);
+     TRACK(4,s) = Source2(Y_LVL,s) + noise * randn(1,1);
+     TRACK(5,s) = Source3(Y_LVL,s) + noise * randn(1,1);
+     TRACK(6,s) = Source4(Y_LVL,s) + noise * randn(1,1);
+
+     TRACK(7,s) = 6;
+    end
+
+elseif(scenario == 5)
+%6 - dla rzeczywistych pomiarow, symulowanych rozkladow
+%po prostej    
+    s1 = Source1(Y_LVL,:);
+    y1 = decimate(s1,5);
+    y1(length(y1)-1) = -85;
+	y1(length(y1)) = -85;
+    y1 = [y1, -85, -85];
+    LENGTH = length(y1);
+    
+    s2 = Source2(Y_LVL,:);
+    y2 = decimate(s2,5);
+    y2 = [y2, -85, -85];
+    
+    s3 = Source3(Y_LVL,:);
+    y3 = decimate(s3,5);
+    y3 = [y3, -85, -85];
+    
+    s4 = Source4(Y_LVL,:);
+    y4 = decimate(s4,5);
+    y4 = [y4, -85, -85];
+        
+    for s=1:LENGTH
+    %     TRACK11(1,s) = s;
+    %     TRACK11(2,s) = Y_LVL;
+
+         TRACK(1,s) = s;
+         %TRACK(2,s) = Y_LVL;
+         TRACK(2,s) = 10;
+         
+         TRACK(7,s) = 6;
+    end
+         TRACK(3,:) = y1;
+         TRACK(4,:) = y2;
+         TRACK(5,:) = y3;
+         TRACK(6,:) = y4;
+elseif(scenario == 6)
+%6 - dla rzeczywistych pomiarow, symulowanych rozkladow
+%nie po prostej
+    sx = 1;
+    sy = 1;
+    disp([LENGTH]);
+    for s=1:LENGTH
+    %     TRACK11(1,s) = s;
+    %     TRACK11(2,s) = Y_LVL;
+    
+    if( s <= 20) %-----
+        TRACK(1,s) = s;
+        TRACK(2,s) = Y_LVL;
+        sx = s;
+        sy = Y_LVL;
+        TRACK(7,s) = 6;
+    elseif(s > 20 && s < 30) %\/\/\/
+        TRACK(1,s) = 20;
+        TRACK(2,s) = Y_LVL + 20 - s;
+        sx = 20;
+        sy = Y_LVL + 20 - s;
+        TRACK(7,s) = 6;
+        
+    elseif(s >= 30 && s < 40) % \/----
+         TRACK(1,s) = s-10;
+         TRACK(2,s) = Y_LVL - 10;
+         sx = s-10;
+         sy = Y_LVL - 10;
+         TRACK(7,s) = 6;
+    elseif(s >= 40 && s <= 50) % /\/\/\
+         TRACK(1,s) = 30;
+         TRACK(2,s) = Y_LVL - 10 - 40 + s;
+         sx = 30;
+         sy = Y_LVL - 10 - 40 + s;
+         TRACK(7,s) = 6;
+    elseif(s > 50 && s <= 60) % /\-----
+         TRACK(1,s) = s-20;
+         TRACK(2,s) = Y_LVL;
+         sx = s-20;
+         sy = Y_LVL;
+         TRACK(7,s) = 6;
+    elseif(s > 60 && s <= 70) % /\-----
+         TRACK(1,s) = 40;
+         TRACK(2,s) = Y_LVL + 60 - s;
+         sx = 40;
+         sy = Y_LVL + 60 - s;
+         TRACK(7,s) = 6;
+    elseif(s > 70 && s <= 80) % /\-----
+         TRACK(1,s) = s-30;
+         TRACK(2,s) = Y_LVL - 10;
+         sx = s-30;
+         sy = Y_LVL - 10;
+         TRACK(7,s) = 6;
+    elseif(s > 80 && s <= 90) % /\-----
+         TRACK(1,s) = 50;
+         TRACK(2,s) = Y_LVL - 10 - 80 + s;
+         sx = 50;
+         sy = Y_LVL - 10 - 80 + s;
+         TRACK(7,s) = 6;
+    elseif(s > 90) % /\-----
+         TRACK(1,s) = s-40;
+         TRACK(2,s) = Y_LVL ;
+         sx = s-40;
+         sy = Y_LVL ;
+         TRACK(7,s) = 6;
+    end
+    
+          TRACK(3,s) = Source1(sy,sx);
+          TRACK(4,s) = Source2(sy,sx);
+          TRACK(5,s) = Source3(sy,sx);
+          TRACK(6,s) = Source4(sy,sx);
+    end
+    
+    elseif(scenario == 7)
+        LENGTH = 645; %(dla Ipin2016Dataset) 
+          sx = 1;
+          sy = 1;
+          disp([LENGTH]);
+       for s=1:LENGTH
+              
+        if( s <= 55) %-----
+            TRACK(1,s) = s;
+            TRACK(2,s) = Y_LVL;
+            sx = s;
+            sy = Y_LVL;
+            TRACK(7,s) = 6;
+        elseif(s > 55 && s <= 395)
+            TRACK(1,s) = 55;
+            TRACK(2,s) = Y_LVL + 55 - s;
+            sx = 55;
+            sy = Y_LVL + 55 - s;
+            TRACK(7,s) = 6;
+        elseif(s > 395 && s <= 700)
+            TRACK(1,s) = 55 - 395 + s;
+            TRACK(2,s) = Y_LVL + 55 - 395;
+            sx = 55 - 395 + s;
+            sy = Y_LVL + 55 - 395;
+            TRACK(7,s) = 6;
+        end
+        disp([s, sy, sx]);
+          TRACK(3,s) = Source1(sy,sx);
+          TRACK(4,s) = Source2(sy,sx);
+          TRACK(5,s) = Source3(sy,sx);
+          TRACK(6,s) = Source4(sy,sx);
+          
+          end
+        
+    
+%         s1 = Source1(Y_LVL,:);
+%     y1 = decimate(s1,5);
+%     y1(length(y1)-1) = -85;
+% 	y1(length(y1)) = -85;
+%     y1 = [y1, -85, -85];
+%     LENGTH1 = length(y1);
+%     
+%     s2 = Source2(Y_LVL,:);
+%     y2 = decimate(s2,5);
+%     y2 = [y2, -85, -85];
+%     
+%     s3 = Source3(Y_LVL,:);
+%     y3 = decimate(s3,5);
+%     y3 = [y3, -85, -85];
+%     
+%     s4 = Source4(Y_LVL,:);
+%     y4 = decimate(s4,5);
+%     y4 = [y4, -85, -85];
+%     Y_LVL = 20;
+%     
+% 
+%     figure(321);
+%     plot(TRACK(2,:),'*');
+%     
+% 	figure(322);
+%     plot(TRACK(1,:),'*');
+%     
+% 	figure(323);
+% 
+%     plot(TRACK(1,:),TRACK(2,:),'*');
+%     grid on;
+%     disp([size(TRACK(2,:))]);
+
+elseif( scenario == 8)
+    
+    T = readtable('D:\Robert\Robert\Doktorat\Artyku³y-uporz¹dkowane\Articles\Articles_10_2020\Datasets\Ipin2016Dataset\x_y_measure1_smartphone_wifi.csv');
+    x = table2array(T(:,4));
+    y = table2array(T(:,5));
+    %y = abs(y-(max(y)+1));
+    src_num = 1;
+    
+    sum_for_source = zeros(1,4);
+    number_of_rssi    = zeros(1,4);
+    group = [7, 9, 71, 126]; 
+    
+    %group = [7, 7, 7, 7]; 
+    
+    for rss = group
+    rssi = table2array(T(:,rss));
+
+    %rssi = abs(rssi);
+    %imagesc(x,y,rssi);
+    
+    %rssi_other_areas
+    rssi_other_areas = -100;
+    
+    xa = (ones(1,XMAX)) * rssi_other_areas;
+    ya = (ones(1,XMAX)) * rssi_other_areas;
+    arr = meshgrid(xa,ya);
+    %disp(['y= ',num2str(max(y))]);
+    %   disp(['x= ',num2str(max(x))]);
+    %accumarray = meshgrid(xa,ya);
+    %accumarray ([x(:),y(:)],rssi(:))
+    
+
+    
+    for i = 1 : size(rssi)
+        arr(x(i),y(i)) = rssi(i);
+        
+        %if(rssi(i) ~=  -100)
+        if((rssi(i) ~=  -100) && (x(i) <  YMAX && y(i) < XMAX))
+            x(i)
+            y(i)
+            switch src_num
+                case 1
+                    x1 = arr(x(i),y(i));
+                    x2 = Source1(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(1)  =  sum_for_source(1) + diff2;
+                    number_of_rssi(1) = number_of_rssi(1) + 1;
+                    TFromS1 = arr;
+                case 2
+                    x1 = arr(x(i),y(i));
+                    x2 = Source2(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(2)  =  sum_for_source(2) + diff2;
+                    number_of_rssi(2) = number_of_rssi(2) + 1;
+                    TFromS2 = arr;
+                case 3
+                    x1 = arr(x(i),y(i));
+                    x2 = Source3(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(3)  =  sum_for_source(3) + diff2;
+                    number_of_rssi(3) = number_of_rssi(3) + 1;
+                    TFromS3 = arr;
+                case 4
+                    x1 = arr(x(i),y(i));
+                    x2 = Source4(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(4)  =  sum_for_source(4) + diff2;
+                    number_of_rssi(4) = number_of_rssi(4) + 1;
+                    TFromS4 = arr;
+            end
+        end
+    
+
+        
+        
+        %Ten kod dodano dla zwiêkszenia iloœci danych z mapy IPIN.
+        change = 0;
+        for j = 1 : 5
+            arr(x(i)+j,y(i)) = (rssi(i) - change);
+            arr(x(i)-j,y(i)) = (rssi(i) - change);
+            
+            arr(x(i),y(i)-j) = (rssi(i) - change);
+            arr(x(i),y(i)+j) = (rssi(i) - change);
+            
+            arr(x(i)-j,y(i)+j) = (rssi(i) - change);
+            arr(x(i)+j,y(i)+j) = (rssi(i) - change);
+            
+            arr(x(i)-j,y(i)-j) = (rssi(i) - change);
+            arr(x(i)+j,y(i)-j) = (rssi(i) - change);
+        end
+       
+    end
+
+
+    %f = figure(rss)
+    %imagesc(arr)
+    arr = flipud(arr);
+    switch src_num
+        case 1
+            TFromS1 = arr;
+        case 2
+            TFromS2 = arr;
+        case 3
+            TFromS3 = arr;
+        case 4
+            TFromS4 = arr;
+    end
+    src_num = src_num + 1;
+    end
+    
+        diff_for_source = zeros(1,4);
+        diff_for_source(1) = sqrt(sum_for_source(1) / number_of_rssi(1)); 
+        diff_for_source(2) = sqrt(sum_for_source(2) / number_of_rssi(2)); 
+        diff_for_source(3) = sqrt(sum_for_source(3) / number_of_rssi(3)); 
+        diff_for_source(4) = sqrt(sum_for_source(4) / number_of_rssi(4)); 
+        
+        disp(['diff_for_source 1=',  num2str(diff_for_source(1)), 'number_of_rssi: ' , num2str(number_of_rssi(1))]);
+        disp(['diff_for_source 2= ', num2str(diff_for_source(2)), 'number_of_rssi: ' , num2str(number_of_rssi(2))]);
+        disp(['diff_for_source 3= ', num2str(diff_for_source(3)), 'number_of_rssi: ' , num2str(number_of_rssi(3))]);
+        disp(['diff_for_source 4= ', num2str(diff_for_source(4)), 'number_of_rssi: ' , num2str(number_of_rssi(4))]);
+
+
+    %figure(9);imagesc(accumarray); colorbar; hold on; grid on;
+    
+    %figure(10);imagesc(TFromS1); colorbar; hold on; grid on;
+    %figure(11);imagesc(TFromS2); colorbar; hold on; grid on;
+    %figure(12);imagesc(TFromS3); colorbar; hold on; grid on;
+    %figure(13);imagesc(TFromS4); colorbar; hold on; grid on;
+
+
+    
+    %figure(100); subplot(2,1,1); imagesc(Source1); colorbar; grid on; subplot(2,1,2); imagesc(TFromS3); colorbar; grid on;
+    %figure(200); subplot(2,1,1); imagesc(Source2); colorbar; grid on; subplot(2,1,2); imagesc(TFromS4); colorbar; grid on;
+    %figure(300); subplot(2,1,1); imagesc(Source3); colorbar; grid on; subplot(2,1,2); imagesc(TFromS1); colorbar; grid on;
+    %figure(400); subplot(2,1,1); imagesc(Source4); colorbar; grid on; subplot(2,1,2); imagesc(TFromS2); colorbar; grid on;
+    
+    disp(['Source1= ',num2str(size(Source1)), 'TFromS3= ',num2str(size(TFromS3))]);
+
+    figure(51);imagesc(TFromS3);
+    figure(52);imagesc(TFromS4);
+    figure(53);imagesc(TFromS1);
+    figure(54);imagesc(TFromS2');
+    for s=1:LENGTH
+     TRACK(1,s) = s; 
+     TRACK(2,s) = Y_LVL;
+
+     %x_percent = s * 100 / LENGTH;
+     %y_percent = (XMAX - Y_LVL) * 100 / LENGTH; 
+      
+     x_coord = Y_LVL; % int16(LENGTH * x_percent / 100);
+     y_coord = s;% int16(LENGTH * y_percent / 100);
+     TRACK(3,s) = TFromS3(x_coord, y_coord);% + noise * randn(1,1);
+     TRACK(4,s) = TFromS4(x_coord, y_coord);% + noise * randn(1,1);
+     TRACK(5,s) = TFromS1(x_coord, y_coord);% + noise * randn(1,1);
+     TRACK(6,s) = TFromS2(x_coord, y_coord);% + noise * randn(1,1);
+
+     TRACK(7,s) = 6;
+    end
+            
+elseif( scenario == 9)
+    
+    T = readtable('D:\Robert\Robert\Doktorat\Artyku³y-uporz¹dkowane\Articles\Articles_10_2020\Datasets\Ipin2016Dataset\x_y_measure1_smartphone_wifi.csv');
+    x = table2array(T(:,4));
+    y = table2array(T(:,5));
+    %y = abs(y-(max(y)+1));
+    src_num = 1;
+    
+    sum_for_source = zeros(1,4);
+    number_of_rssi    = zeros(1,4);
+    group = [7, 9, 71, 126]; 
+    
+    %group = [7, 7, 7, 7]; 
+    
+    for rss = group
+    rssi = table2array(T(:,rss));
+
+    %rssi = abs(rssi);
+    %imagesc(x,y,rssi);
+    
+    %rssi_other_areas
+    rssi_other_areas = -100;
+    
+    xa = (ones(1,XMAX)) * rssi_other_areas;
+    ya = (ones(1,XMAX)) * rssi_other_areas;
+    arr = meshgrid(xa,ya);
+    %disp(['y= ',num2str(max(y))]);
+    %   disp(['x= ',num2str(max(x))]);
+    %accumarray = meshgrid(xa,ya);
+    %accumarray ([x(:),y(:)],rssi(:))
+    
+
+    
+    for i = 1 : size(rssi)
+        arr(x(i),y(i)) = rssi(i);
+        
+        if(rssi(i) ~=  -100)
+            switch src_num
+                case 1
+                    x1 = arr(x(i),y(i));
+                    x2 = Source1(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(1)  =  sum_for_source(1) + diff2;
+                    number_of_rssi(1) = number_of_rssi(1) + 1;
+                    TFromS1 = arr;
+                case 2
+                    x1 = arr(x(i),y(i));
+                    x2 = Source2(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(2)  =  sum_for_source(2) + diff2;
+                    number_of_rssi(2) = number_of_rssi(2) + 1;
+                    TFromS2 = arr;
+                case 3
+                    x1 = arr(x(i),y(i));
+                    x2 = Source3(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(3)  =  sum_for_source(3) + diff2;
+                    number_of_rssi(3) = number_of_rssi(3) + 1;
+                    TFromS3 = arr;
+                case 4
+                    x1 = arr(x(i),y(i));
+                    x2 = Source4(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(4)  =  sum_for_source(4) + diff2;
+                    number_of_rssi(4) = number_of_rssi(4) + 1;
+                    TFromS4 = arr;
+            end
+        end
+    
+
+        
+        
+        %Ten kod dodano dla zwiêkszenia iloœci danych z mapy IPIN.
+        change = 0;
+        for j = 1 : 5
+            arr(x(i)+j,y(i)) = (rssi(i) - change);
+            arr(x(i)-j,y(i)) = (rssi(i) - change);
+            
+            arr(x(i),y(i)-j) = (rssi(i) - change);
+            arr(x(i),y(i)+j) = (rssi(i) - change);
+            
+            arr(x(i)-j,y(i)+j) = (rssi(i) - change);
+            arr(x(i)+j,y(i)+j) = (rssi(i) - change);
+            
+            arr(x(i)-j,y(i)-j) = (rssi(i) - change);
+            arr(x(i)+j,y(i)-j) = (rssi(i) - change);
+        end
+       
+    end
+
+
+    %f = figure(rss)
+    %imagesc(arr)
+    arr = flipud(arr);
+    switch src_num
+        case 1
+            TFromS1 = arr;
+        case 2
+            TFromS2 = arr;
+        case 3
+            TFromS3 = arr;
+        case 4
+            TFromS4 = arr;
+    end
+    src_num = src_num + 1;
+    end
+    
+        diff_for_source = zeros(1,4);
+        diff_for_source(1) = sqrt(sum_for_source(1) / number_of_rssi(1)); 
+        diff_for_source(2) = sqrt(sum_for_source(2) / number_of_rssi(2)); 
+        diff_for_source(3) = sqrt(sum_for_source(3) / number_of_rssi(3)); 
+        diff_for_source(4) = sqrt(sum_for_source(4) / number_of_rssi(4)); 
+        
+        disp(['diff_for_source 1=',  num2str(diff_for_source(1)), 'number_of_rssi: ' , num2str(number_of_rssi(1))]);
+        disp(['diff_for_source 2= ', num2str(diff_for_source(2)), 'number_of_rssi: ' , num2str(number_of_rssi(2))]);
+        disp(['diff_for_source 3= ', num2str(diff_for_source(3)), 'number_of_rssi: ' , num2str(number_of_rssi(3))]);
+        disp(['diff_for_source 4= ', num2str(diff_for_source(4)), 'number_of_rssi: ' , num2str(number_of_rssi(4))]);
+
+
+    %figure(9);imagesc(accumarray); colorbar; hold on; grid on;
+    
+    %figure(10);imagesc(TFromS1); colorbar; hold on; grid on;
+    %figure(11);imagesc(TFromS2); colorbar; hold on; grid on;
+    %figure(12);imagesc(TFromS3); colorbar; hold on; grid on;
+    %figure(13);imagesc(TFromS4); colorbar; hold on; grid on;
+
+
+    
+    %figure(100); subplot(2,1,1); imagesc(Source1); colorbar; grid on; subplot(2,1,2); imagesc(TFromS3); colorbar; grid on;
+    %figure(200); subplot(2,1,1); imagesc(Source2); colorbar; grid on; subplot(2,1,2); imagesc(TFromS4); colorbar; grid on;
+    %figure(300); subplot(2,1,1); imagesc(Source3); colorbar; grid on; subplot(2,1,2); imagesc(TFromS1); colorbar; grid on;
+    %figure(400); subplot(2,1,1); imagesc(Source4); colorbar; grid on; subplot(2,1,2); imagesc(TFromS2); colorbar; grid on;
+    
+    disp(['Source1= ',num2str(size(Source1)), 'TFromS3= ',num2str(size(TFromS3))]);
+
+    %figure(51);imagesc(TFromS3);
+    %figure(52);imagesc(TFromS4);
+    %figure(53);imagesc(TFromS1);
+    %figure(54);imagesc(TFromS2);
+    
+       LENGTH = 645; %(dla Ipin2016Dataset) 
+       sx = 1;
+       sy = 1;
+       disp([LENGTH]);
+       for s=1:689
+              
+        if( s <= 54) %-----
+            TRACK(1,s) = s;
+            TRACK(2,s) = 354;
+            sx = s;
+            sy = 354;
+            TRACK(7,s) = 6;
+        elseif(s > 54 && s <= 341)
+            TRACK(1,s) = 54;
+            TRACK(2,s) = 354 + 54 - s;
+            sx = 54;
+            sy = 354 + 54 - s;
+            TRACK(7,s) = 6;
+        elseif(s > 341 && s <= 577)
+            TRACK(1,s) = 54 - 341 + s;
+            TRACK(2,s) = 13;
+            sx = 54 - 341 + s;
+            sy = 13;
+            TRACK(7,s) = 6;
+        elseif(s > 577 && s <= 613)
+            TRACK(1,s) = 290;
+            TRACK(2,s) = 13 - 577 + s;
+            sx = 290;
+            sy = 13 - 577 + s;
+            TRACK(7,s) = 6;
+            
+        elseif(s > 613 && s <= 700)
+            TRACK(1,s) = 290 - 613 + s;
+            TRACK(2,s) = 48;
+            sx = 290 - 613 + s;
+            sy = 48;
+            TRACK(7,s) = 6;
+        end
+        %disp([s, sy, sx]);
+          TRACK(3,s) = TFromS3(sy,sx);
+          TRACK(4,s) = TFromS4(sy,sx);
+          TRACK(5,s) = TFromS1(sy,sx);
+          TRACK(6,s) = TFromS2(sy,sx);
+          
+          end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+elseif( scenario == 10)
+    
+    T = readtable('D:\Robert\Robert\Doktorat\Artyku³y-uporz¹dkowane\Articles\Articles_10_2020\Datasets\Ipin2016Dataset\x_y_measure1_smartphone_wifi.csv');
+    x = table2array(T(:,4));
+    y = table2array(T(:,5));
+    %y = abs(y-(max(y)+1));
+    src_num = 1;
+    
+    sum_for_source = zeros(1,4);
+    number_of_rssi    = zeros(1,4);
+    group = [17, 19, 55, 80]; 
+    
+    %group = [7, 9, 71, 126]; 
+    %group = [7, 7, 7, 7]; 
+    
+    for rss = group
+    rssi = table2array(T(:,rss));
+
+    %rssi = abs(rssi);
+    %imagesc(x,y,rssi);
+    
+    %rssi_other_areas
+    rssi_other_areas = -100;
+    
+    xa = (ones(1,XMAX)) * rssi_other_areas;
+    ya = (ones(1,XMAX)) * rssi_other_areas;
+    arr = meshgrid(xa,ya);
+    %disp(['y= ',num2str(max(y))]);
+    %   disp(['x= ',num2str(max(x))]);
+    %accumarray = meshgrid(xa,ya);
+    %accumarray ([x(:),y(:)],rssi(:))
+    
+
+    
+    for i = 1 : size(rssi)
+        if(x(i) < 359)
+        arr(x(i),y(i)) = rssi(i);
+        
+        if(rssi(i) ~=  -100)
+            switch src_num
+                case 1
+                    x1 = arr(x(i),y(i));
+                    x2 = Source1(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(1)  =  sum_for_source(1) + diff2;
+                    number_of_rssi(1) = number_of_rssi(1) + 1;
+                    TFromS1 = arr;
+                case 2
+                    x1 = arr(x(i),y(i));
+                    x2 = Source2(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(2)  =  sum_for_source(2) + diff2;
+                    number_of_rssi(2) = number_of_rssi(2) + 1;
+                    TFromS2 = arr;
+                case 3
+                    x1 = arr(x(i),y(i));
+                    x2 = Source3(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(3)  =  sum_for_source(3) + diff2;
+                    number_of_rssi(3) = number_of_rssi(3) + 1;
+                    TFromS3 = arr;
+                case 4
+                    x1 = arr(x(i),y(i));
+                    x2 = Source4(x(i),y(i));
+
+                    diff = x1 - x2;
+                    diff2 = diff * diff;
+                    sum_for_source(4)  =  sum_for_source(4) + diff2;
+                    number_of_rssi(4) = number_of_rssi(4) + 1;
+                    TFromS4 = arr;
+            end
+        end
+    end
+
+        
+        
+        %Ten kod dodano dla zwiêkszenia iloœci danych z mapy IPIN.
+        change = 0;
+        for j = 1 : 5
+            arr(x(i)+j,y(i)) = (rssi(i) - change);
+            arr(x(i)-j,y(i)) = (rssi(i) - change);
+            
+            arr(x(i),y(i)-j) = (rssi(i) - change);
+            arr(x(i),y(i)+j) = (rssi(i) - change);
+            
+            arr(x(i)-j,y(i)+j) = (rssi(i) - change);
+            arr(x(i)+j,y(i)+j) = (rssi(i) - change);
+            
+            arr(x(i)-j,y(i)-j) = (rssi(i) - change);
+            arr(x(i)+j,y(i)-j) = (rssi(i) - change);
+        end
+       
+    end
+
+
+    %f = figure(rss)
+    %imagesc(arr)
+    arr = flipud(arr);
+    switch src_num
+        case 1
+            TFromS1 = arr;
+        case 2
+            TFromS2 = arr;
+        case 3
+            TFromS3 = arr;
+        case 4
+            TFromS4 = arr;
+    end
+    src_num = src_num + 1;
+    end
+    
+        diff_for_source = zeros(1,4);
+        diff_for_source(1) = sqrt(sum_for_source(1) / number_of_rssi(1)); 
+        diff_for_source(2) = sqrt(sum_for_source(2) / number_of_rssi(2)); 
+        diff_for_source(3) = sqrt(sum_for_source(3) / number_of_rssi(3)); 
+        diff_for_source(4) = sqrt(sum_for_source(4) / number_of_rssi(4)); 
+        
+        disp(['diff_for_source 1=',  num2str(diff_for_source(1)), 'number_of_rssi: ' , num2str(number_of_rssi(1))]);
+        disp(['diff_for_source 2= ', num2str(diff_for_source(2)), 'number_of_rssi: ' , num2str(number_of_rssi(2))]);
+        disp(['diff_for_source 3= ', num2str(diff_for_source(3)), 'number_of_rssi: ' , num2str(number_of_rssi(3))]);
+        disp(['diff_for_source 4= ', num2str(diff_for_source(4)), 'number_of_rssi: ' , num2str(number_of_rssi(4))]);
+
+
+    %figure(9);imagesc(accumarray); colorbar; hold on; grid on;
+    
+    %figure(10);imagesc(TFromS1); colorbar; hold on; grid on;
+    %figure(11);imagesc(TFromS2); colorbar; hold on; grid on;
+    %figure(12);imagesc(TFromS3); colorbar; hold on; grid on;
+    %figure(13);imagesc(TFromS4); colorbar; hold on; grid on;
+
+
+    
+    %figure(100); subplot(2,1,1); imagesc(Source1); colorbar; grid on; subplot(2,1,2); imagesc(TFromS3); colorbar; grid on;
+    %figure(200); subplot(2,1,1); imagesc(Source2); colorbar; grid on; subplot(2,1,2); imagesc(TFromS4); colorbar; grid on;
+    %figure(300); subplot(2,1,1); imagesc(Source3); colorbar; grid on; subplot(2,1,2); imagesc(TFromS1); colorbar; grid on;
+    %figure(400); subplot(2,1,1); imagesc(Source4); colorbar; grid on; subplot(2,1,2); imagesc(TFromS2); colorbar; grid on;
+    
+    disp(['Source1= ',num2str(size(Source1)), 'TFromS3= ',num2str(size(TFromS3))]);
+
+    figure(51);imagesc(TFromS3);
+    figure(52);imagesc(TFromS4);
+    figure(53);imagesc(TFromS1);
+    figure(54);imagesc(TFromS2);
+    
+       LENGTH = 645; %(dla Ipin2016Dataset) 
+       sx = 1;
+       sy = 1;
+       disp([LENGTH]);
+       for s=1:689
+              
+        if( s <= 54) %-----
+            TRACK(1,s) = s;
+            TRACK(2,s) = 354;
+            sx = s;
+            sy = 322;
+            TRACK(7,s) = 6;
+        elseif(s > 54 && s <= 322)
+            TRACK(1,s) = 54;
+            TRACK(2,s) = 322 + 54 - s;
+            sx = 54;
+            sy = 322 + 54 - s;
+            TRACK(7,s) = 6;
+        elseif(s > 322 && s <= 558)
+            TRACK(1,s) = 54 - 341 + s;
+            TRACK(2,s) = 13;
+            sx = 54 - 322 + s;
+            sy = 13;
+            TRACK(7,s) = 6;
+        elseif(s > 558 && s <= 594)
+            TRACK(1,s) = 290;
+            TRACK(2,s) = 13 - 558 + s;
+            sx = 290;
+            sy = 13 - 558 + s;
+            TRACK(7,s) = 6;
+            
+        elseif(s > 594 && s <= 681)
+            TRACK(1,s) = 290 - 594 + s;
+            TRACK(2,s) = 48;
+            sx = 290 - 594 + s;
+            sy = 48;
+            TRACK(7,s) = 6;
+        end
+        %disp([s, sy, sx]);
+          TRACK(3,s) = TFromS3(sy,sx);
+          TRACK(4,s) = TFromS4(sy,sx);
+          TRACK(5,s) = TFromS1(sy,sx);
+          TRACK(6,s) = TFromS2(sy,sx);
+          
+          end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    end
