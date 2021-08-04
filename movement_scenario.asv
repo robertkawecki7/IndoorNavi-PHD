@@ -25,7 +25,6 @@ if(scenario == 0)
          TRACK(6,s) = Source4(Y_LVL,s) + noise * randn(1,1);
 
          TRACK(7,s) = 6;
-         
         end
     TRACK(2,~TRACK(2,:))=1;
 
@@ -35,23 +34,15 @@ elseif(scenario == 1)
     %     TRACK11(2,s) = Y_LVL;
 
          TRACK(1,s) = s;
-         TRACK(2,s) = s;
+         TRACK(2,s) = Y_LVL;
 
-         TRACK(3,s) = Source1(s,s) + noise * randn(1,1);
-         TRACK(4,s) = Source2(s,s) + noise * randn(1,1);
-         TRACK(5,s) = Source3(s,s) + noise * randn(1,1);
-         TRACK(6,s) = Source4(s,s) + noise * randn(1,1);
+         TRACK(3,s) = Source1(Y_LVL,s) + noise * randn(1,1);
+         TRACK(4,s) = Source2(Y_LVL,s) + noise * randn(1,1);
+         TRACK(5,s) = Source3(Y_LVL,s) + noise * randn(1,1);
+         TRACK(6,s) = Source4(Y_LVL,s) + noise * randn(1,1);
 
          TRACK(7,s) = 6;
-         
-                  
-         TFromS1(s)= Source1(s,s) + noise * randn(1,1);
-         TFromS2(s)= Source2(s,s) + noise * randn(1,1);
-         TFromS3(s)= Source3(s,s) + noise * randn(1,1);
-         TFromS4(s)= Source4(s,s) + noise * randn(1,1);
-         
     end
- 
 
 elseif(scenario == 2)
     for s=1:LENGTH

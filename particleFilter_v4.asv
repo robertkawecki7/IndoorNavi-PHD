@@ -77,7 +77,7 @@ end
     end 
 start_from = 1;
 x_est = 1;         %estymacja poczatkowa x
-y_est = 1;%6;         %estymacja poczatkowa y 
+y_est = Y_LVL;%6;         %estymacja poczatkowa y 
     %rozpocznij symulacje od n-tej próbki
 
 %MASK2 = 80;
@@ -101,13 +101,13 @@ end
  
 
 %SIGMA_A =   5;       %rozrzut czasteczek
-SIGMA_X = 4;
-SIGMA_Y = 4;
-G_THR =   0.8;     %degeneration threshold
-dx_max = 2;        %maksymalne przesuniêcie kolejnej estymaty w osi x
-dy_max = 2;        %maksymalne przesuniêcie kolejnej estymaty w osi y
+SIGMA_X = 5;
+SIGMA_Y = 5;
+G_THR =   1;%0.8;     %degeneration threshold
+dx_max = 5;        %maksymalne przesuniêcie kolejnej estymaty w osi x
+dy_max = 5;        %maksymalne przesuniêcie kolejnej estymaty w osi y
 
-RSSI_range = 2;      %zakres dla poszukiwania lokalizacji na mapie rozkladu dla zmierzonej wartosci RSSI 
+RSSI_range = 3;      %zakres dla poszukiwania lokalizacji na mapie rozkladu dla zmierzonej wartosci RSSI 
 RSSI_range_default = RSSI_range;
 RSSI_range_max = 9;  %maksymalny rozrzut RSSI +- wartoœci zmierzonej (uzuty w algorytmie, którego celem jest zwiekszenie tolerancji poszukiwan.
 noise = 0;         %szum pomiaru (dodawany szum gaussa, lub o rozkladzie normalnym do kazdej probki)
@@ -120,9 +120,9 @@ stop_from_step = 40;         %zatrzymanie sie uzytkownika w danym kroku symulacj
 add_noise_standing = 1;      %wartosc szumu dla stojacego uzytkownika
 %adjust_rss_range = 1;
 adjust_rss_range_enable =0;  %w razie gdy nie znaleziono wartosci zblizonych pomiarowi +- RSSI_range w danym obszarze, mozna zwiekszac tolerancje RSSI_range
-limit_range = 1;
-dx_max_uniq = 2;           %maksymalne obszar poszukiwan wartosci zblizonej pomiarowi w osi x
-dy_max_uniq = 2;           %maksymalne obszar poszukiwan wartosci zblizonej pomiarowi w osi y
+limit_range = 0;
+dx_max_uniq = 5;           %maksymalne obszar poszukiwan wartosci zblizonej pomiarowi w osi x
+dy_max_uniq = 5;           %maksymalne obszar poszukiwan wartosci zblizonej pomiarowi w osi y
 limit_similar_meas = 0;
 use_track_offset = 1;
 
@@ -162,7 +162,7 @@ TRACK = [];
 Source1 = change_antenna_characteristics(Source1,1);
 Source2 = change_antenna_characteristics(Source2,2);
 Source3 = change_antenna_characteristics(Source3,3);
-Source4 = change_antenna_ch aracteristics(Source4,4);
+Source4 = change_antenna_characteristics(Source4,4);
 %}
 
 %for real-vs-simulated test - load Sources again
@@ -189,7 +189,7 @@ else
     Source2 = Source2 - diff_for_source(4);
     Source3 = Source3 - diff_for_source(1);
     Source4 = Source4 - diff_for_source(2);
-    
+    %}
     
     
     Source1 = Source1 - 40;
@@ -201,7 +201,7 @@ else
     Source2(Source2 <= -100) = -100;
     Source3(Source3 <= -100) = -100;
     Source4(Source4 <= -100) = -100;
-    %}
+    
     %TFromS1=adjust_source(TFromS1);
     %TFromS2=adjust_source(TFromS2);
     %TFromS3=adjust_source(TFromS3);
@@ -353,20 +353,17 @@ while s < length(TRACK(1,:))
     src3 = [X_S3,Y_S3];
     src4 = [X_S4,Y_S4];
 
-    A = [X_S Y_S];    %Previous iteration
-    B = [X_S1; Y_S1]; %Source1 
-    C = [X_S2; Y_S2]; %Source2
-    D = [X_S3; Y_S3]; %Source3
-    E = [X_S4; Y_S4]; %Source4
-    %try
+    A = [X_S Y_S];
+    B = [X_S1'; Y_S1']';
+    C = [X_S2'; Y_S2']';
+    D = [X_S3'; Y_S3']';
+    E = [X_S4'; Y_S4']';
+    try
        E_uniq = find_common(B,C,D,E, x_est, y_est, dx_max_uniq, dy_max_uniq, limit_range); 
-       if (~isempty(E_uniq))
-           E_uniq
-       end
-    %catch
+    catch
        E_uniq = [];
        %%disp('Exception: E_uniq empty')
-    %end
+    end
     if(adjust_rss_range_enable == 1)
         RSSI_range = adjust_rss_range(RSSI_range, E_uniq, repeats, dx_max, dy_max, RSSI_range_default,debug_mode);
     end

@@ -5,7 +5,7 @@ if(data_type == 1)
     B=A';
 
     Source1=B*A;
-    Source1 = Source1 ./ 100;
+    Source1 =rot90( Source1 ./ 100);
     Source2 =rot90(Source1);
     Source3 =rot90(Source2);
     Source4 =rot90(Source3);
@@ -22,7 +22,7 @@ elseif (data_type == 2)
     r = sqrt (x .^ 2 + y .^ 2) + 2*eps;
     tz = 1./exp(r).*((cos(r.^f)))./(exp(r.^a));
     tzz=tz.^2;
-    Source1 =10*((log(tzz))+80 ) / 8;%wynik wyglada jak by byl w dB
+    Source1 =rot90(10*((log(tzz))+80 ) / 8);%wynik wyglada jak by byl w dB
     Source2 =rot90(Source1);
     Source3 =rot90(Source2);
     Source4 =rot90(Source3);
@@ -350,13 +350,13 @@ elseif(data_type == 24)
 %end
 elseif(data_type == 25)
 	[X, Y, Z] = getPower('D:\Robert\Projekty\doktorat_kod_matlab\source\wyniki_share\1\lodex3pBT.power.t001_09.r005.p2m');
-    Source1 =  Z';
+    Source1 =  Z;
     [X, Y, Z] = getPower('D:\Robert\Projekty\doktorat_kod_matlab\source\wyniki_share\1\lodex3pBT.power.t001_13.r005.p2m');
-    Source2 =  Z';
-    [X, Y, Z] = getPower('D:\Robert\Projekty\doktorat_kod_matlab\source\wyniki_share\1\lodex3pBT.power.t001_15.r005.p2m');
-    Source3 =  Z';
+    Source2 =  Z;
+    [X, Y, Z] = getPower('D:\Robert\Projekty\doktorat_kod_matlab\source\wyniki_share\1\lodex3pBT.power.t001_13.r005.p2m');
+    Source3 =  Z;
     [X, Y, Z] = getPower('D:\Robert\Projekty\doktorat_kod_matlab\source\wyniki_share\1\lodex3pBT.power.t001_12.r005.p2m');
-    Source4 =  Z';         
+    Source4 =  Z;         
 elseif(data_type == 26)
  	[X, Y, Z] = getPower('D:\Robert\Projekty\doktorat_kod_matlab\source\wyniki_share\2\lodex3pBT.power.t001_09.r008.p2m');
     Source1 =  Z';
